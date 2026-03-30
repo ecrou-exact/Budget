@@ -243,7 +243,17 @@ function selectPeriod(id) {
   currentPeriodId = id;
   getBSModal('selectPeriodModal').hide();
   renderPeriodSelector();
+  goToTab('dashboard');
   updateAllUI();
+}
+
+function goToTab(tabId) {
+  const tabs = document.querySelectorAll('#mainTabs .nav-link');
+  tabs.forEach(tab => {
+    if (tab.getAttribute('data-tab') === tabId) {
+      tab.click(); 
+    }
+  });
 }
 
 function navigatePeriod(dir) {
