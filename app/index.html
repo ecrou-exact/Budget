@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budge — Gestion Financière</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+    <!-- ===== NAVBAR / HEADER ===== -->
+    <nav class="navbar navbar-dark bgt-navbar sticky-top">
+        <div class="container-fluid px-3">
+
+            <!-- Logo -->
+            <span class="navbar-brand mb-0 bgt-logo">
+                <i class="fa-solid fa-coins me-2"></i>Budge
+            </span>
+
+            <!-- Nav tabs -->
+            <ul class="nav bgt-tabs mx-auto" id="mainTabs">
+                <li class="nav-item">
+                    <button class="nav-link active" data-tab="dashboard">
+                        <i class="fa-solid fa-gauge-high me-1"></i>Dashboard
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab="analytics">
+                        <i class="fa-solid fa-chart-line me-1"></i>Analytics
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab="annual">
+                        <i class="fa-solid fa-calendar-days me-1"></i>Périodes
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab="report">
+                        <i class="fa-solid fa-file-lines me-1"></i>Rapport
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Period selector -->
+            <div class="d-flex align-items-center gap-2 bgt-period-bar">
+                <button class="btn btn-sm bgt-nav-btn" id="prevPeriodBtn" title="Période précédente">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="bgt-period-display" id="periodDisplay" onclick="openPeriodModal()"
+                    title="Changer de période">
+                    <span class="bgt-period-label" id="periodLabel">Sélectionner</span>
+                    <span class="bgt-period-dates" id="periodDates"></span>
+                </div>
+                <button class="btn btn-sm bgt-nav-btn" id="nextPeriodBtn" title="Période suivante">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <button class="btn btn-sm bgt-btn-new-period" onclick="openNewPeriodModal()">
+                    <i class="fa-solid fa-plus me-1"></i>Période
+                </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 ms-3">
+                <button class="btn btn-sm bgt-btn-action" onclick="exportPeriodData()" title="Exporter">
+                    <i class="fa-solid fa-download me-1"></i>Export
+                </button>
+                <button class="btn btn-sm bgt-btn-action" onclick="openImportModal()" title="Importer">
+                    <i class="fa-solid fa-upload me-1"></i>Import
+                </button>
+                <button class="btn btn-sm bgt-btn-layout" onclick="toggleLayoutLock()" id="layoutLockBtn"
+                    title="Déverrouiller le layout pour drag&drop">
+                    <i class="fa-solid fa-lock" id="layoutLockIcon"></i>
+                </button>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- ===== MAIN ===== -->
+    <main class="bgt-main">
+
+        <!-- ===== DASHBOARD TAB ===== -->
+        <div id="dashboard" class="tab-pane active">
+            <div class="container-fluid">
+                <div class="row g-3">
+
+                    <!-- LEFT COLUMN (draggable widgets) -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div id="dashboardWidgets" class="bgt-widget-grid">
+                            <!-- WIDGET: Stats KPI -->
+                            <div class="bgt-widget" data-widget="stats" id="w-stats">
+                                <div class="bgt-widget-header">
+                                    <span><i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i><i
+                                            class="fa-solid fa-chart-simple me-1"></i>Résumé</span>
+                                </div>
+                                <div class="bgt-widget-body">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-3">
+                                            <div class="bgt-kpi bgt-kpi-income">
+                                                <div class="bgt-kpi-label"><i
+                                                        class="fa-solid fa-arrow-trend-up me-1"></i>Revenus</div>
+                                                <div class="bgt-kpi-value" id="totalIncome">0 €</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="bgt-kpi bgt-kpi-expense">
+                                                <div class="bgt-kpi-label"><i
+                                                        class="fa-solid fa-arrow-trend-down me-1"></i>Dépenses</div>
+                                                <div class="bgt-kpi-value" id="totalExpenses">0 €</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="bgt-kpi bgt-kpi-balance">
+                                                <div class="bgt-kpi-label"><i
+                                                        class="fa-solid fa-scale-balanced me-1"></i>Solde</div>
+                                                <div class="bgt-kpi-value" id="balance">0 €</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="bgt-kpi bgt-kpi-ratio">
+                                                <div class="bgt-kpi-label"><i class="fa-solid fa-percent me-1"></i>Ratio
+                                                </div>
+                                                <div class="bgt-kpi-value" id="ratio">0%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Charts -->
+                            <div class="bgt-widget" data-widget="charts" id="w-charts">
+                                <div class="bgt-widget-header">
+                                    <span><i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i><i
+                                            class="fa-solid fa-chart-pie me-1"></i>Graphiques</span>
+                                </div>
+                                <div class="bgt-widget-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="bgt-chart-label">Répartition dépenses</div>
+                                            <div class="bgt-chart-wrap"><canvas id="expenseChart"></canvas></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="bgt-chart-label">Revenus vs Dépenses</div>
+                                            <div class="bgt-chart-wrap"><canvas id="comparisonChart"></canvas></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Revenus -->
+                            <div class="bgt-widget" data-widget="income" id="w-income">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseIncome" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-money-bill-wave me-1 text-success"></i>Revenus
+                                        <span class="badge bgt-badge ms-2" id="incomeCount">0</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseIncome">
+                                    <div class="bgt-widget-body p-0">
+                                        <div id="incomeList"></div>
+                                        <div id="incomeEmpty" class="bgt-empty" style="display:none">
+                                            <i class="fa-regular fa-folder-open fa-2x mb-2"></i><br>Aucun revenu pour
+                                            cette période
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Dépenses Fixes -->
+                            <div class="bgt-widget" data-widget="fixed" id="w-fixed">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFixed" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-thumbtack me-1 text-warning"></i>Dépenses Fixes
+                                        <span class="badge bgt-badge ms-2" id="fixedCount">0</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseFixed">
+                                    <div class="bgt-widget-body p-0">
+                                        <div id="fixedExpensesList"></div>
+                                        <div id="fixedEmpty" class="bgt-empty" style="display:none">
+                                            <i class="fa-regular fa-circle-check fa-2x mb-2"></i><br>Aucune dépense fixe
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Filtres -->
+                            <div class="bgt-widget" data-widget="filters" id="w-filters">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFilters" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-filter me-1"></i>Filtres Catégories
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation()">
+                                        <button class="btn btn-xs bgt-filter-all"
+                                            onclick="setAllFilters(true)">Tout</button>
+                                        <button class="btn btn-xs bgt-filter-all"
+                                            onclick="setAllFilters(false)">Aucun</button>
+                                        <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="collapse show" id="collapseFilters">
+                                    <div class="bgt-widget-body">
+                                        <div class="d-flex flex-wrap gap-2" id="filterGrid"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Dépenses Variables -->
+                            <div class="bgt-widget" data-widget="variable" id="w-variable">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseVariable" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-receipt me-1 text-info"></i>Dépenses Variables
+                                        <span class="badge bgt-badge ms-2" id="variableCount">0</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseVariable">
+                                    <div class="bgt-widget-body p-0">
+                                        <div id="variableExpensesList"></div>
+                                        <div id="variableEmpty" class="bgt-empty" style="display:none">
+                                            <i class="fa-regular fa-folder-open fa-2x mb-2"></i><br>Aucune dépense
+                                            variable
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Breakdown catégories -->
+                            <div class="bgt-widget" data-widget="breakdown" id="w-breakdown">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseBreakdown" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-tags me-1"></i>Détails par Catégorie
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseBreakdown">
+                                    <div class="bgt-widget-body">
+                                        <div id="categoryBreakdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- /dashboardWidgets -->
+                    </div><!-- /left col -->
+
+                    <!-- RIGHT SIDEBAR (forms) -->
+                    <div class="col-xl-4 col-lg-5">
+                        <div id="sidebarWidgets" class="bgt-widget-grid">
+
+                            <!-- FORM: Revenu -->
+                            <div class="bgt-widget" data-widget="form-income" id="w-form-income">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFormIncome" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-plus-circle me-1 text-success"></i>Ajouter un Revenu
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseFormIncome">
+                                    <div class="bgt-widget-body">
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Libellé</label>
+                                            <div class="position-relative">
+                                                <input type="text" id="incomeName" class="form-control bgt-input"
+                                                    placeholder="Ex: Salaire, Freelance…"
+                                                    oninput="showSuggestions(this,'income')" autocomplete="off" />
+                                                <div class="bgt-suggestions" id="incomeSuggestions"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Montant (€)</label>
+                                            <input type="number" id="incomeAmount" class="form-control bgt-input"
+                                                placeholder="0.00" step="0.01" min="0" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Date de réception</label>
+                                            <input type="date" id="incomeDate" class="form-control bgt-input" />
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="incomeRecurring"
+                                                onchange="toggleIncomeRecurrence()" />
+                                            <label class="form-check-label" for="incomeRecurring">Récurrent chaque
+                                                période</label>
+                                        </div>
+                                        <div id="incomeRecurrenceOptions" class="bgt-recurrence-box"
+                                            style="display:none">
+                                            <label class="bgt-label">Date d'arrêt (optionnel)</label>
+                                            <input type="date" id="incomeEndDate" class="form-control bgt-input" />
+                                            <small class="text-muted">Laissez vide = reconduit indéfiniment</small>
+                                        </div>
+                                        <button class="btn bgt-btn-primary w-100 mt-2" onclick="addIncome()">
+                                            <i class="fa-solid fa-plus me-1"></i>Ajouter le Revenu
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FORM: Dépense -->
+                            <div class="bgt-widget" data-widget="form-expense" id="w-form-expense">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFormExpense" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-minus-circle me-1 text-danger"></i>Ajouter une Dépense
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseFormExpense">
+                                    <div class="bgt-widget-body">
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Libellé</label>
+                                            <div class="position-relative">
+                                                <input type="text" id="expenseName" class="form-control bgt-input"
+                                                    placeholder="Ex: Loyer, Électricité…"
+                                                    oninput="showSuggestions(this,'expense')" autocomplete="off" />
+                                                <div class="bgt-suggestions" id="expenseSuggestions"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Montant (€)</label>
+                                            <input type="number" id="expenseAmount" class="form-control bgt-input"
+                                                placeholder="0.00" step="0.01" min="0" />
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="bgt-label">Catégorie</label>
+                                                <select id="expenseCategory" class="form-select bgt-input"
+                                                    onchange="updateSubcategories('expenseCategory','expenseSubcategory')">
+                                                    <option value="Alimentation">🍎 Alimentation</option>
+                                                    <option value="Transport">🚗 Transport</option>
+                                                    <option value="Loisirs">🎮 Loisirs</option>
+                                                    <option value="Santé">🏥 Santé</option>
+                                                    <option value="Abonnements">📱 Abonnements</option>
+                                                    <option value="Utilities">💡 Utilities</option>
+                                                    <option value="Autres">📦 Autres</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="bgt-label">Sous-catégorie</label>
+                                                <select id="expenseSubcategory" class="form-select bgt-input">
+                                                    <option value="">-- Choisir --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Date</label>
+                                            <input type="date" id="expenseDate" class="form-control bgt-input" />
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="expenseFixed"
+                                                onchange="toggleExpenseRecurrence()" />
+                                            <label class="form-check-label" for="expenseFixed">Dépense fixe
+                                                récurrente</label>
+                                        </div>
+                                        <div id="expenseRecurrenceOptions" class="bgt-recurrence-box"
+                                            style="display:none">
+                                            <label class="bgt-label">Date d'arrêt (optionnel)</label>
+                                            <input type="date" id="expenseEndDate" class="form-control bgt-input" />
+                                            <small class="text-muted">Laissez vide = reconduit indéfiniment</small>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="expensePending" />
+                                            <label class="form-check-label" for="expensePending">À venir / non encore
+                                                payée</label>
+                                        </div>
+                                        <button class="btn bgt-btn-danger w-100" onclick="addExpense()">
+                                            <i class="fa-solid fa-plus me-1"></i>Ajouter la Dépense
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FORM: Import CSV -->
+                            <div class="bgt-widget" data-widget="form-import" id="w-form-import">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFormImport" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-file-import me-1"></i>Import CSV/JSON
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                </div>
+                                <div class="collapse show" id="collapseFormImport">
+                                    <div class="bgt-widget-body">
+                                        <input type="file" id="csvFileInput" class="form-control bgt-input"
+                                            accept=".csv,.json" onchange="handleFileUpload(event)" />
+                                        <small class="text-muted d-block mt-2">Format CSV : Nom | Montant | Date |
+                                            Catégorie</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- /sidebarWidgets -->
+                    </div><!-- /right col -->
+
+                </div><!-- /row -->
+            </div>
+        </div><!-- /dashboard -->
+
+        <!-- ===== ANALYTICS TAB ===== -->
+        <div id="analytics" class="tab-pane">
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-chart-line me-1"></i>Évolution — Toutes
+                                les Périodes</div>
+                            <div class="bgt-widget-body">
+                                <div class="bgt-chart-wrap-tall"><canvas id="trendChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-layer-group me-1"></i>Distribution par
+                                Catégorie</div>
+                            <div class="bgt-widget-body">
+                                <div class="bgt-chart-wrap"><canvas id="categoryStackedChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-table me-1"></i>Stats par Catégorie
+                            </div>
+                            <div class="bgt-widget-body p-0">
+                                <table class="table bgt-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Catégorie</th>
+                                            <th>Total</th>
+                                            <th>Moy./période</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analyticsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-piggy-bank me-1"></i>Épargne par
+                                Période</div>
+                            <div class="bgt-widget-body">
+                                <div class="bgt-chart-wrap"><canvas id="savingsChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ANNUAL / PERIODS TAB ===== -->
+        <div id="annual" class="tab-pane">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="bgt-section-title mb-0"><i class="fa-solid fa-calendar-days me-2"></i>Toutes les Périodes
+                    </h5>
+                    <button class="btn bgt-btn-primary btn-sm" onclick="openNewPeriodModal()">
+                        <i class="fa-solid fa-plus me-1"></i>Nouvelle Période
+                    </button>
+                </div>
+                <div class="row g-3" id="periodsGrid"></div>
+                <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-chart-area me-1"></i>Vue Globale</div>
+                            <div class="bgt-widget-body">
+                                <div class="bgt-chart-wrap-tall"><canvas id="annualChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-sigma me-1"></i>Résumé Global</div>
+                            <div class="bgt-widget-body p-0">
+                                <table class="table bgt-table mb-0">
+                                    <tbody id="annualSummary"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== REPORT TAB ===== -->
+        <div id="report" class="tab-pane">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="bgt-section-title mb-0"><i class="fa-solid fa-file-lines me-2"></i>Rapport de Période
+                    </h5>
+                    <button class="btn bgt-btn-action btn-sm" onclick="generatePDFReport()">
+                        <i class="fa-solid fa-file-pdf me-1"></i>Télécharger PDF
+                    </button>
+                </div>
+                <div class="bgt-widget">
+                    <div class="bgt-widget-body" id="reportContent">
+                        <p class="text-muted">Sélectionnez une période pour générer le rapport.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Edit/Create Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title" id="editModalTitle"><i class="fa-solid fa-pen me-2"></i>Modifier</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="editFormContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Period Modal -->
+    <div class="modal fade" id="periodModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title" id="periodModalTitle">
+                        <i class="fa-solid fa-calendar-plus me-2"></i>Nouvelle Période Salariale
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        id="periodModalClose"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert bgt-alert-info mb-3" id="periodBlockedAlert" style="display:none">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        <strong>Période en cours ouverte.</strong> Vous devez d'abord clôturer la période actuelle en
+                        renseignant sa date de fin avant d'en créer une nouvelle.
+                        <br><button class="btn btn-sm bgt-btn-warning mt-2" onclick="closeCurrentPeriodFirst()">
+                            <i class="fa-solid fa-lock me-1"></i>Clôturer la période actuelle
+                        </button>
+                    </div>
+                    <div id="periodFormFields">
+                        <div class="mb-3">
+                            <label class="bgt-label">Libellé de la période</label>
+                            <input type="text" id="periodName" class="form-control bgt-input"
+                                placeholder="Ex: Salaire Mars 2025" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="bgt-label"><i class="fa-solid fa-play me-1 text-success"></i>Date de début
+                                (jour du salaire)</label>
+                            <input type="date" id="periodStart" class="form-control bgt-input" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="bgt-label"><i class="fa-solid fa-stop me-1 text-danger"></i>Date de fin
+                                (veille du prochain salaire)</label>
+                            <input type="date" id="periodEnd" class="form-control bgt-input" />
+                            <small class="text-muted">Laissez vide si la période est en cours</small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn bgt-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button class="btn bgt-btn-primary" id="periodSaveBtn" onclick="createPeriod()">
+                            <i class="fa-solid fa-check me-1"></i>Créer la Période
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Select Period Modal -->
+    <div class="modal fade" id="selectPeriodModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-list me-2"></i>Choisir une Période</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="periodList" class="d-flex flex-column gap-2"></div>
+                    <div class="mt-3">
+                        <button class="btn bgt-btn-primary w-100" onclick="hidePeriodListAndNew()">
+                            <i class="fa-solid fa-plus me-1"></i>Créer une nouvelle période
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stop Recurring Modal -->
+    <div class="modal fade" id="stopRecurringModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-stop-circle me-2 text-danger"></i>Arrêter la
+                        Récurrence</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">À partir de quelle période arrêter cet élément ?</p>
+                    <div class="mb-3">
+                        <label class="bgt-label">Arrêter à partir de</label>
+                        <select id="stopFromPeriod" class="form-select bgt-input"></select>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn bgt-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button class="btn btn-danger" onclick="confirmStopRecurring()">
+                            <i class="fa-solid fa-ban me-1"></i>Arrêter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-file-import me-2"></i>Importer des Données</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="bgt-label">Sélectionner un fichier (.json ou .csv)</label>
+                        <input type="file" id="importFile" class="form-control bgt-input" accept=".json,.csv"
+                            onchange="previewImportData(event)" />
+                    </div>
+                    <div id="importPreview"></div>
+                    <div class="d-flex gap-2 justify-content-end mt-3">
+                        <button class="btn bgt-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button class="btn bgt-btn-primary" onclick="confirmImport()">
+                            <i class="fa-solid fa-check me-1"></i>Importer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="liveToast" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastBody"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="external/bootstrap.bundle.min.js"></script>
+    <!-- SortableJS for drag & drop -->
+    <script src="external/Sortable.min.js"></script>
+    <!-- Chart.js -->
+    <script src="external/chart.min.js"></script>
+    <!-- html2pdf -->
+    <script src="external/html2pdf.bundle.min.js"></script>
+    <!-- App -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
