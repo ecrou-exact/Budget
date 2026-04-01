@@ -83,9 +83,21 @@
 
             <!-- Actions -->
             <div class="d-flex gap-2 ms-3 align-items-center">
-                <button class="btn btn-sm bgt-btn-action" onclick="exportPeriodData()" title="Exporter">
-                    <i class="fa-solid fa-download me-1"></i>Export
-                </button>
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sm bgt-btn-action dropdown-toggle" data-bs-toggle="dropdown"
+                        title="Exporter">
+                        <i class="fa-solid fa-download me-1"></i>Export
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        style="background:var(--bgt-bg2);border-color:var(--bgt-border)">
+                        <li><a class="dropdown-item" href="#" onclick="exportPeriodData();return false;"
+                                style="color:var(--bgt-text)"><i class="fa-solid fa-calendar-days me-2"></i>Période
+                                courante</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportAllData();return false;"
+                                style="color:var(--bgt-text)"><i class="fa-solid fa-database me-2"></i>Export
+                                complet</a></li>
+                    </ul>
+                </div>
                 <button class="btn btn-sm bgt-btn-action" onclick="openImportModal()" title="Importer">
                     <i class="fa-solid fa-upload me-1"></i>Import
                 </button>
@@ -600,28 +612,41 @@
             <div class="container-fluid">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="bgt-section-title mb-0">
-                        <i class="fa-solid fa-clock-rotate-left me-2"></i>Historique des Sauvegardes
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Sauvegardes sur disque
                     </h5>
-                    <div class="d-flex gap-2">
-                        <button class="btn bgt-btn-action btn-sm" onclick="saveHistorySnapshot('Manuel')">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn bgt-btn-action btn-sm" onclick="saveNowToDisk()">
                             <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder maintenant
                         </button>
+                        <button class="btn bgt-btn-secondary btn-sm" onclick="chooseSaveFolder()">
+                            <i class="fa-solid fa-folder-open me-1"></i>Choisir le dossier
+                        </button>
                         <button class="btn bgt-btn-secondary btn-sm" onclick="clearHistory()">
-                            <i class="fa-solid fa-trash-can me-1"></i>Vider tout
+                            <i class="fa-solid fa-trash-can me-1"></i>Vider le log
                         </button>
                     </div>
                 </div>
-                <p class="text-muted small mb-3">
-                    <i class="fa-solid fa-circle-info me-1"></i>
-                    Sauvegardes automatiques à chaque modification et à la fermeture. Organisées <strong>année →
-                        période</strong>.
-                    Cliquez sur <i class="fa-solid fa-xmark fa-xs"></i> pour supprimer une entrée.
-                </p>
+                <div class="alert bgt-alert-info mb-3" style="font-size:.82rem">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    La sauvegarde se fait <strong>automatiquement à la fermeture</strong> dans le dossier choisi.<br>
+                    Chaque sauvegarde crée/écrase le fichier <code>budge_AAAA_NomPeriode.json</code>.<br>
+                    Dossier actuel : <span id="saveFolderName" style="font-family:var(--bgt-mono)">Non configuré</span>
+                    &nbsp;<button class="btn btn-link btn-sm p-0" style="font-size:.78rem"
+                        onclick="chooseSaveFolder()">Modifier</button>
+                    <div id="saveFolderHint"
+                        style="display:none;margin-top:.4rem;font-size:.78rem;color:var(--bgt-text3)"><i
+                            class="fa-solid fa-circle-info me-1"></i>Firefox : la sauvegarde automatique à la fermeture
+                        déclenchera un téléchargement. Utilisez "Sauvegarder maintenant" pour forcer le téléchargement
+                        immédiatement.</div>
+                </div>
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="bgt-widget">
                             <div class="bgt-widget-header"><i class="fa-solid fa-list me-1"></i>Entrées récentes</div>
                             <div class="bgt-widget-body p-2">
+                                <div id="unsavedBackupNotif" class="alert mb-3"
+                                    style="display:none;background:rgba(245,158,11,.12);border:1px solid var(--bgt-warning);border-radius:.5rem;font-size:.82rem">
+                                </div>
                                 <div id="historyList"></div>
                             </div>
                         </div>
@@ -905,8 +930,39 @@
     <script src="external/chart.min.js"></script>
     <!-- html2pdf -->
     <script src="external/html2pdf.bundle.min.js"></script>
-    <!-- App -->
-    <script src="js/main.js"></script>
+
+    <!-- ===== App — chargement modulaire ===== -->
+
+    <!-- 1. Core : constantes, état, stockage -->
+    <script src="js/core/constants.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/storage.js"></script>
+
+    <!-- 2. Utils : helpers génériques, toasts -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/toast.js"></script>
+
+    <!-- 3. Features : fonctionnalités métier -->
+    <script src="js/features/history.js"></script>
+    <script src="js/features/transactions.js"></script>
+    <script src="js/features/periods.js"></script>
+    <script src="js/features/projects.js"></script>
+    <script src="js/features/report.js"></script>
+    <script src="js/features/export.js"></script>
+
+    <!-- 4. UI : interface utilisateur -->
+    <script src="js/ui/tabs.js"></script>
+    <script src="js/ui/theme.js"></script>
+    <script src="js/ui/layout.js"></script>
+    <script src="js/ui/filters.js"></script>
+    <script src="js/ui/render.js"></script>
+
+    <!-- 5. Charts : graphiques Chart.js -->
+    <script src="js/charts/annual.js"></script>
+    <script src="js/charts/charts.js"></script>
+
+    <!-- 6. Init : point d'entrée, DOMContentLoaded -->
+    <script src="js/core/init.js"></script>
 </body>
 
 </html>
