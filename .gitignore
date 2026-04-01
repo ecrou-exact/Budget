@@ -1,0 +1,62 @@
+# ============================================================
+# Budge — .gitignore
+# ============================================================
+
+# Dépendances Node / Electron (réinstallables via npm install)
+node_modules/
+.npm/
+
+# Build / distribution
+dist/
+out/
+build/
+
+# Backups locaux (données personnelles, jamais sur GitHub)
+app/backups/
+
+# Logs
+*.log
+npm-debug.log*
+electron-debug.log*
+
+# Fichiers système macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Fichiers système Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Fichiers système Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Variables d'environnement
+.env
+.env.local
+.env.*.local
+
+# Fichiers temporaires
+*.tmp
+*.temp
+.cache/
+</parameter>
