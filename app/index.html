@@ -47,6 +47,16 @@
                     </button>
                 </li>
                 <li class="nav-item">
+                    <button class="nav-link" data-tab="projects">
+                        <i class="fa-solid fa-folder-open me-1"></i>Projets
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab="history">
+                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Historique
+                    </button>
+                </li>
+                <li class="nav-item">
                     <button class="nav-link" data-tab="report">
                         <i class="fa-solid fa-file-lines me-1"></i>Rapport
                     </button>
@@ -72,7 +82,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="d-flex gap-2 ms-3">
+            <div class="d-flex gap-2 ms-3 align-items-center">
                 <button class="btn btn-sm bgt-btn-action" onclick="exportPeriodData()" title="Exporter">
                     <i class="fa-solid fa-download me-1"></i>Export
                 </button>
@@ -83,6 +93,25 @@
                     title="Déverrouiller le layout pour drag&drop">
                     <i class="fa-solid fa-lock" id="layoutLockIcon"></i>
                 </button>
+                <!-- Mode switcher — FIX: wrapper z-index:1100, listeners câblés en JS (pas inline) -->
+                <div class="bgt-mode-wrapper">
+                    <button class="btn btn-sm bgt-mode-btn" id="modeSwitchBtn" title="Changer de thème">
+                        <i class="fa-solid fa-circle-half-stroke me-1"></i>
+                        <span id="modeLabel">Sombre</span>
+                    </button>
+
+                    <div class="bgt-mode-menu" id="modeMenu">
+                        <div class="bgt-mode-option" data-mode="dark">
+                            <i class="fa-solid fa-moon" style="color:#818cf8"></i> Mode Sombre
+                        </div>
+                        <div class="bgt-mode-option" data-mode="light">
+                            <i class="fa-solid fa-sun" style="color:#f59e0b"></i> Mode Clair
+                        </div>
+                        <!-- <div class="bgt-mode-option" data-mode="zen">
+                            <i class="fa-solid fa-spa" style="color:#b388ff"></i> Mode Détente
+                        </div> -->
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -155,6 +184,30 @@
                                             <div class="bgt-chart-label">Revenus vs Dépenses</div>
                                             <div class="bgt-chart-wrap"><canvas id="comparisonChart"></canvas></div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET: Projets & Épargne (dépôt rapide) -->
+                            <div class="bgt-widget" data-widget="projects-widget" id="w-projects-widget">
+                                <div class="bgt-widget-header d-flex align-items-center justify-content-between"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseProjectsWidget" role="button">
+                                    <span>
+                                        <i class="fa-solid fa-arrows-up-down-left-right bgt-drag-handle me-2"></i>
+                                        <i class="fa-solid fa-folder me-1" style="color:var(--bgt-warning)"></i>
+                                        Projets &amp; Épargne
+                                        <span class="badge bgt-badge ms-2" id="projectsCount">0</span>
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation()">
+                                        <button class="btn btn-xs bgt-filter-all" onclick="openProjectModal()">
+                                            <i class="fa-solid fa-plus fa-xs me-1"></i>Nouveau
+                                        </button>
+                                        <i class="fa-solid fa-chevron-down bgt-collapse-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="collapse show" id="collapseProjectsWidget">
+                                    <div class="bgt-widget-body p-0">
+                                        <div id="projectsWidgetList"></div>
                                     </div>
                                 </div>
                             </div>
@@ -283,6 +336,21 @@
                                 </div>
                                 <div class="collapse show" id="collapseFormIncome">
                                     <div class="bgt-widget-body">
+                                        <div class="mb-3">
+                                            <label class="bgt-label">Type de revenu</label>
+                                            <select id="incomeType" class="form-select bgt-input">
+                                                <option value="Salaire">💼 Salaire</option>
+                                                <option value="Prime">⭐ Prime</option>
+                                                <option value="Bonus">🎁 Bonus</option>
+                                                <option value="Freelance">💻 Freelance</option>
+                                                <option value="Remboursement">↩️ Remboursement</option>
+                                                <option value="Allocation">🏛️ Allocation</option>
+                                                <option value="Loyer perçu">🏠 Loyer perçu</option>
+                                                <option value="Dividende">📈 Dividende</option>
+                                                <option value="Vente">🏷️ Vente</option>
+                                                <option value="Autre revenu">🪙 Autre revenu</option>
+                                            </select>
+                                        </div>
                                         <div class="mb-3">
                                             <label class="bgt-label">Libellé</label>
                                             <div class="position-relative">
@@ -509,6 +577,68 @@
             </div>
         </div>
 
+        <!-- ===== PROJECTS TAB ===== -->
+        <div id="projects" class="tab-pane">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="bgt-section-title mb-0">
+                        <i class="fa-solid fa-folder-open me-2"></i>Projets &amp; Enveloppes Budgétaires
+                    </h5>
+                    <button class="btn bgt-btn-primary btn-sm" onclick="openProjectModal()">
+                        <i class="fa-solid fa-plus me-1"></i>Nouveau Projet
+                    </button>
+                </div>
+                <p class="text-muted small mb-3"><i class="fa-solid fa-circle-info me-1"></i>
+                    Créez des projets pour allouer de l'argent chaque mois ou sur une période spécifique.
+                    L'<strong>épargne automatique</strong> est prélevée à chaque nouvelle période.</p>
+                <div class="row g-3" id="projectsGrid"></div>
+            </div>
+        </div>
+
+        <!-- ===== HISTORY TAB ===== -->
+        <div id="history" class="tab-pane">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="bgt-section-title mb-0">
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>Historique des Sauvegardes
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn bgt-btn-action btn-sm" onclick="saveHistorySnapshot('Manuel')">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder maintenant
+                        </button>
+                        <button class="btn bgt-btn-secondary btn-sm" onclick="clearHistory()">
+                            <i class="fa-solid fa-trash-can me-1"></i>Vider tout
+                        </button>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Sauvegardes automatiques à chaque modification et à la fermeture. Organisées <strong>année →
+                        période</strong>.
+                    Cliquez sur <i class="fa-solid fa-xmark fa-xs"></i> pour supprimer une entrée.
+                </p>
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-list me-1"></i>Entrées récentes</div>
+                            <div class="bgt-widget-body p-2">
+                                <div id="historyList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="bgt-widget">
+                            <div class="bgt-widget-header"><i class="fa-solid fa-folder-tree me-1"></i>Arborescence
+                            </div>
+                            <div class="bgt-widget-body p-2">
+                                <div id="historyTree"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== REPORT TAB ===== -->
         <div id="report" class="tab-pane">
             <div class="container-fluid">
@@ -660,6 +790,98 @@
                             <i class="fa-solid fa-check me-1"></i>Importer
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal — icônes, auto-épargne, allocations par période -->
+    <div class="modal fade" id="projectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title" id="projectModalTitle"><i class="fa-solid fa-folder-plus me-2"></i>Nouveau
+                        Projet</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="bgt-label">Nom du projet</label>
+                            <input type="text" id="projName" class="form-control bgt-input"
+                                placeholder="Ex: Vacances, Rénovation cuisine…" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="bgt-label">Budget total cible (€)</label>
+                            <input type="number" id="projBudget" class="form-control bgt-input" placeholder="0.00"
+                                step="0.01" min="0" />
+                        </div>
+                        <div class="col-12">
+                            <label class="bgt-label">Description (optionnel)</label>
+                            <input type="text" id="projDesc" class="form-control bgt-input"
+                                placeholder="Objectif, notes…" />
+                        </div>
+                        <div class="col-12">
+                            <label class="bgt-label"><i class="fa-solid fa-rotate fa-xs me-1"></i>Épargne automatique
+                                (€/période) — optionnel</label>
+                            <input type="number" id="projAutoSave" class="form-control bgt-input"
+                                placeholder="0.00 — laisser vide pour désactiver" step="0.01" min="0" />
+                            <small class="text-muted">Ce montant sera mis de côté automatiquement à chaque nouvelle
+                                période</small>
+                        </div>
+                        <div class="col-6">
+                            <label class="bgt-label">Couleur</label>
+                            <div class="d-flex gap-2 flex-wrap mt-1" id="projColorPicker"></div>
+                        </div>
+                        <div class="col-6">
+                            <label class="bgt-label">Icône</label>
+                            <div class="d-flex gap-1 flex-wrap mt-1" id="projIconPicker"></div>
+                        </div>
+                        <div class="col-12">
+                            <hr style="border-color:var(--bgt-border)" />
+                            <h6 class="bgt-label mb-2">Allocations manuelles par période</h6>
+                            <p class="text-muted small mb-2">Définissez un montant précis pour certaines périodes
+                                (prioritaire sur l'auto-épargne).</p>
+                            <div id="projAllocations" class="d-flex flex-column gap-1"></div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end mt-3">
+                        <button class="btn bgt-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button class="btn bgt-btn-primary" onclick="saveProject()">
+                            <i class="fa-solid fa-check me-1"></i>Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Detail Modal -->
+    <div class="modal fade" id="projectDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title" id="projDetailTitle">Détail du Projet</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="projDetailBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Preview Modal -->
+    <div class="modal fade" id="historyPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bgt-modal">
+                <div class="modal-header bgt-modal-header">
+                    <h5 class="modal-title" id="historyPreviewTitle"><i class="fa-solid fa-eye me-2"></i>Aperçu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="historyPreviewBody"></div>
+                <div class="modal-footer" style="border-top:1px solid var(--bgt-border)">
+                    <button class="btn bgt-btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button class="btn bgt-btn-primary" id="historyDownloadBtn"><i
+                            class="fa-solid fa-download me-1"></i>Télécharger</button>
                 </div>
             </div>
         </div>
