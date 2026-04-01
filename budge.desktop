@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Budge
+Comment=Gestion budgétaire personnelle
+Exec=/home/geffe/Documents/Personnal_project/Budget/start.sh
+Icon=/home/geffe/Documents/Personnal_project/Budget/app/images/icon.png
+Terminal=false
+Categories=Finance;Office;
+StartupWMClass=budge
+StartupNotify=true

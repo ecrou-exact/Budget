@@ -1,0 +1,40 @@
+{
+  "name": "budge",
+  "version": "4.4.0",
+  "description": "Gestion budgétaire personnelle",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox",
+    "build-linux": "electron-builder --linux",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "start-win": "electron .",
+    "start-linux": "electron . --no-sandbox",
+    "start-mac": "electron ."
+  },
+  "build": {
+    "appId": "com.budge.app",
+    "productName": "Budge",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "app/**/*"
+    ],
+    "linux": {
+      "target": "AppImage",
+      "category": "Finance"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}

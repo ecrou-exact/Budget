@@ -84,18 +84,12 @@
             <!-- Actions -->
             <div class="d-flex gap-2 ms-3 align-items-center">
                 <div class="dropdown d-inline-block">
-                    <button class="btn btn-sm bgt-btn-action dropdown-toggle" data-bs-toggle="dropdown"
-                        title="Exporter">
+                    <button class="btn btn-sm bgt-btn-action dropdown-toggle" data-bs-toggle="dropdown" title="Exporter">
                         <i class="fa-solid fa-download me-1"></i>Export
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end"
-                        style="background:var(--bgt-bg2);border-color:var(--bgt-border)">
-                        <li><a class="dropdown-item" href="#" onclick="exportPeriodData();return false;"
-                                style="color:var(--bgt-text)"><i class="fa-solid fa-calendar-days me-2"></i>Période
-                                courante</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportAllData();return false;"
-                                style="color:var(--bgt-text)"><i class="fa-solid fa-database me-2"></i>Export
-                                complet</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" style="background:var(--bgt-bg2);border-color:var(--bgt-border)">
+                        <li><a class="dropdown-item" href="#" onclick="exportPeriodData();return false;" style="color:var(--bgt-text)"><i class="fa-solid fa-calendar-days me-2"></i>Période courante</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportAllData();return false;" style="color:var(--bgt-text)"><i class="fa-solid fa-database me-2"></i>Export complet</a></li>
                     </ul>
                 </div>
                 <button class="btn btn-sm bgt-btn-action" onclick="openImportModal()" title="Importer">
@@ -631,22 +625,15 @@
                     La sauvegarde se fait <strong>automatiquement à la fermeture</strong> dans le dossier choisi.<br>
                     Chaque sauvegarde crée/écrase le fichier <code>budge_AAAA_NomPeriode.json</code>.<br>
                     Dossier actuel : <span id="saveFolderName" style="font-family:var(--bgt-mono)">Non configuré</span>
-                    &nbsp;<button class="btn btn-link btn-sm p-0" style="font-size:.78rem"
-                        onclick="chooseSaveFolder()">Modifier</button>
-                    <div id="saveFolderHint"
-                        style="display:none;margin-top:.4rem;font-size:.78rem;color:var(--bgt-text3)"><i
-                            class="fa-solid fa-circle-info me-1"></i>Firefox : la sauvegarde automatique à la fermeture
-                        déclenchera un téléchargement. Utilisez "Sauvegarder maintenant" pour forcer le téléchargement
-                        immédiatement.</div>
+                    &nbsp;<button class="btn btn-link btn-sm p-0" style="font-size:.78rem" onclick="chooseSaveFolder()">Modifier</button>
+                    <div id="saveFolderHint" style="display:none;margin-top:.4rem;font-size:.78rem;color:var(--bgt-text3)"><i class="fa-solid fa-circle-info me-1"></i>Firefox : la sauvegarde automatique à la fermeture déclenchera un téléchargement. Utilisez "Sauvegarder maintenant" pour forcer le téléchargement immédiatement.</div>
                 </div>
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="bgt-widget">
                             <div class="bgt-widget-header"><i class="fa-solid fa-list me-1"></i>Entrées récentes</div>
                             <div class="bgt-widget-body p-2">
-                                <div id="unsavedBackupNotif" class="alert mb-3"
-                                    style="display:none;background:rgba(245,158,11,.12);border:1px solid var(--bgt-warning);border-radius:.5rem;font-size:.82rem">
-                                </div>
+                                <div id="unsavedBackupNotif" class="alert mb-3" style="display:none;background:rgba(245,158,11,.12);border:1px solid var(--bgt-warning);border-radius:.5rem;font-size:.82rem"></div>
                                 <div id="historyList"></div>
                             </div>
                         </div>

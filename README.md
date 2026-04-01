@@ -83,3 +83,55 @@ Les scripts sont chargés dans l'ordre suivant dans `index.html` :
 - **Sortable.js** — drag & drop widgets
 - **html2pdf** — export PDF
 - **localStorage** — persistance des données (aucun backend)
+
+---
+
+## 🖥️ Lancement en application de bureau (Electron)
+
+### Prérequis
+- [Node.js](https://nodejs.org) v18+ installé
+
+### Démarrage rapide
+
+**Linux / Mac :**
+```bash
+./start.sh
+```
+
+**Windows :**
+Double-cliquer sur `start.bat`
+
+**Manuellement :**
+```bash
+npm install   # une seule fois
+npm start
+```
+
+### Structure des sauvegardes (mode Electron)
+
+```
+~/.config/budge/Budge/backups/     (Linux)
+~/Library/Application Support/Budge/backups/  (Mac)
+%APPDATA%\budge\Budge\backups\     (Windows)
+│
+├── 2025/
+│   ├── budge_2025_Salaire_Janvier.json
+│   ├── budge_2025_Salaire_Fevrier.json
+│   └── budge_2025_Salaire_Mars.json
+│
+└── 2026/
+    ├── budge_2026_Janvier_2026.json
+    └── budge_2026_Fevrier_2026.json
+```
+
+- **Sauvegarde automatique** à chaque fermeture de l'app
+- **Sauvegarde manuelle** via l'onglet Historique → "Sauvegarder maintenant"
+- **Suppression** : quand tu supprimes une période, le fichier backup est supprimé
+- **Dossier année** : créé automatiquement selon la date de DÉBUT de la période
+
+### Mode navigateur (sans Electron)
+
+| Navigateur | Méthode |
+|---|---|
+| Chrome / Edge | Dossier choisi via "Choisir le dossier", sauvegarde silencieuse |
+| Firefox | Téléchargement du fichier JSON à chaque sauvegarde |
