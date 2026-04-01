@@ -127,24 +127,23 @@ function editPeriod(id) {
 }
 
 function deletePeriod(id) {
-  if (!confirm('Supprimer cette période et toutes ses données ?')) return;
-  // Récupérer la période avant suppression pour supprimer son backup
-  const periodToDelete = getPeriod(id);
-  appData.items   = appData.items.filter(i => i.periodId !== id);
-  appData.projects.forEach(proj => {
-    if (proj.allocations) delete proj.allocations[id];
-    if (proj.paused)      delete proj.paused[id];
+  bgtConfirm('Supprimer cette période et toutes ses données ?', () => {
+    const periodToDelete = getPeriod(id);
+    appData.items = appData.items.filter(i => i.periodId !== id);
+    appData.projects.forEach(proj => {
+      if (proj.allocations) delete proj.allocations[id];
+      if (proj.paused)      delete proj.paused[id];
+    });
+    appData.periods = appData.periods.filter(p => p.id !== id);
+    if (currentPeriodId === id) {
+      const s = sortedPeriods();
+      currentPeriodId = s.length ? s[s.length-1].id : null;
+    }
+    save(); renderPeriodSelector(); updateAllUI();
+    if (document.getElementById('annual').classList.contains('active')) updateAnnualView();
+    if (periodToDelete) deleteBackupForPeriod(periodToDelete);
+    showToast('Période supprimée','info');
   });
-  appData.periods = appData.periods.filter(p => p.id !== id);
-  if (currentPeriodId === id) {
-    const s = sortedPeriods();
-    currentPeriodId = s.length ? s[s.length-1].id : null;
-  }
-  save(); renderPeriodSelector(); updateAllUI();
-  if (document.getElementById('annual').classList.contains('active')) updateAnnualView();
-  // Supprimer le fichier backup associé
-  if (periodToDelete) deleteBackupForPeriod(periodToDelete);
-  showToast('Période supprimée','info');
 }
 
 // Réinitialisation de la modale période à sa fermeture

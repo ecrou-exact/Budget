@@ -91,7 +91,13 @@ function addExpense() {
 // ============================================================
 function deleteItem(id) {
   const item = appData.items.find(i => i.id === id); if (!item) return;
-  if (item.recurringId && !confirm('Supprimer uniquement pour cette période ?')) return;
+  if (item.recurringId) {
+    bgtConfirm('Supprimer cet élément uniquement pour cette période ?', () => {
+      appData.items = appData.items.filter(i => i.id !== id);
+      save(); updateAllUI(); showToast('Supprimé', 'info');
+    });
+    return;
+  }
   appData.items = appData.items.filter(i => i.id !== id);
   save(); updateAllUI(); showToast('Supprimé','info');
 }

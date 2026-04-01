@@ -17,3 +17,34 @@ function shortPeriodDates(p) { if (!p) return ''; return formatDateFR(p.startDat
 function formatAmount(n) { const abs=Math.abs(n); return (n<0?'−':'')+abs.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
 function getOpenPeriod() { return appData.periods.find(p => !p.endDate) || null; }
 function hasOpenPeriod() { return !!getOpenPeriod(); }
+
+// ============================================================
+// CONFIRM — remplace window.confirm() incompatible avec Electron
+// Usage : bgtConfirm('Message ?', () => { /* action */ });
+// ============================================================
+function bgtConfirm(message, onYes, labelYes, styleYes) {
+  const id  = 'bgt-confirm-modal';
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'modal fade';
+    el.setAttribute('tabindex', '-1');
+    el.setAttribute('data-bs-backdrop', 'static');
+    document.body.appendChild(el);
+  }
+  el.innerHTML =
+    '<div class="modal-dialog modal-dialog-centered modal-sm">'
+    + '<div class="modal-content bgt-modal">'
+    + '<div class="modal-body p-4" style="text-align:center">'
+    + '<i class="fa-solid fa-triangle-exclamation fa-xl mb-3 d-block" style="color:var(--bgt-warning)"></i>'
+    + '<p style="font-size:.9rem;margin-bottom:1.2rem">' + message + '</p>'
+    + '<div class="d-flex gap-2 justify-content-center">'
+    + '<button class="btn bgt-btn-secondary" id="bgt-confirm-no">Annuler</button>'
+    + '<button class="btn ' + (styleYes || 'btn-danger') + '" id="bgt-confirm-yes">' + (labelYes || 'Confirmer') + '</button>'
+    + '</div></div></div></div>';
+  const modal = new bootstrap.Modal(el);
+  modal.show();
+  document.getElementById('bgt-confirm-no').onclick  = () => modal.hide();
+  document.getElementById('bgt-confirm-yes').onclick = () => { modal.hide(); onYes(); };
+}

@@ -40,8 +40,8 @@ let mainWindow;
 
 function createWindow() {
   const iconPath = process.platform === 'win32'
-    ? path.join(__dirname, '..', 'app/images', 'icon.ico')
-    : path.join(__dirname, '..', 'app/images', 'icon.png');
+    ? path.join(__dirname, '..', 'app', 'icon.ico')
+    : path.join(__dirname, '..', 'app', 'icon.png');
 
   mainWindow = new BrowserWindow({
     width:   1280,
@@ -58,6 +58,12 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'app', 'index.html'));
+
+  // Activer confirm/alert/prompt natifs (nécessaire dans Electron récent)
+  mainWindow.webContents.on('before-input-event', () => {});
+  mainWindow.webContents.executeJavaScript(`
+    window._electronConfirmEnabled = true;
+  `).catch(() => {});
 
   // Supprimer le menu natif (optionnel — gardez-le si vous voulez les raccourcis)
   mainWindow.setMenuBarVisibility(false);

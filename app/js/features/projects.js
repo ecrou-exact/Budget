@@ -209,11 +209,12 @@ function saveProject() {
 }
 
 function deleteProject(id) {
-  if (!confirm('Supprimer ce projet et toutes ses dépenses associées ?')) return;
-  appData.items    = appData.items.filter(i => i.projectId !== id);
-  appData.projects = appData.projects.filter(p => p.id !== id);
-  save(); renderProjects(); renderProjectsWidget(); updateAllUI();
-  showToast('Projet supprimé', 'info');
+  bgtConfirm('Supprimer ce projet et toutes ses dépenses associées ?', () => {
+    appData.items    = appData.items.filter(i => i.projectId !== id);
+    appData.projects = appData.projects.filter(p => p.id !== id);
+    save(); renderProjects(); renderProjectsWidget(); updateAllUI();
+    showToast('Projet supprimé', 'info');
+  });
 }
 
 // ============================================================

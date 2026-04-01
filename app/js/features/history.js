@@ -429,8 +429,13 @@ function downloadPendingBackup() {
 }
 
 function clearHistory() {
-  if (!confirm('Vider le log des sauvegardes ? (les fichiers sur disque ne sont pas supprimés)')) return;
-  localStorage.removeItem('budge_save_log');
-  renderHistory();
-  showToast('Log vidé', 'info');
+  bgtConfirm(
+    'Vider le log des sauvegardes ?<br><small style="color:var(--bgt-text3)">Les fichiers sur disque ne sont pas supprimés.</small>',
+    () => {
+      localStorage.removeItem('budge_save_log');
+      renderHistory();
+      showToast('Log vidé', 'info');
+    },
+    'Vider', 'btn-warning'
+  );
 }

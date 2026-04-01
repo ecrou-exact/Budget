@@ -88,7 +88,7 @@ function confirmImport() {
 
       if (d._exportType === 'full') {
         // ---- Import intégral ----
-        if (!confirm('Cet import va FUSIONNER toutes les données. Continuer ?')) return;
+        bgtConfirm('Cet import va FUSIONNER toutes les données existantes. Continuer ?', () => {
         // Fusionne périodes
         (d.periods||[]).forEach(p => { if (!appData.periods.find(x=>x.id===p.id)) appData.periods.push(p); });
         // Fusionne items
@@ -108,9 +108,13 @@ function confirmImport() {
             });
           });
         }
-        // Sélectionner la dernière période
         const sorted = sortedPeriods();
         if (sorted.length) currentPeriodId = sorted[sorted.length-1].id;
+        save(); getBSModal('importModal').hide();
+        renderPeriodSelector(); updateAllUI();
+        showToast('Import réussi ✓','success');
+        }, 'Importer', 'bgt-btn-primary');
+        return;
 
       } else {
         // ---- Import d'une période ----
